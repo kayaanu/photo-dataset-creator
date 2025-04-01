@@ -2,45 +2,45 @@ import cv2
 import os
 import time
 
-def capture_images():
-    
-    # throws = ["paper", "rock", "scissors"]
-    # hands  = ["left", "right"]
+def capture_images(throw, hand, amount):
+    SHUTTER_SPEED = 0.100 #Takes photo every 100 milliseconds
+    IMAGE_SIZE = 400
     
     # Create the images directory if it doesn't exist
-    throw = "paper"
-    hand = "right"
-    
     output = f"{throw}_{hand}"
     os.makedirs(output, exist_ok=True)
     
     # Open webcam
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
-        print("ERR: Could not open webcam.")
+        print("ERR: webcam closed.")
         return
     
-    for i in range(50):
+    # Take photos
+    for i in range(amount):
         ret, frame = cap.read()
         if not ret:
             print(f"ERR: Could not read frame {i}")
             break
         
-        # Get center crop of 360*360 pixels
+        # Get center crop of 400x400 pixels
         height, width, _ = frame.shape
-        start_x = (width - 360) // 2
-        start_y = (height - 360) // 2
-        cropped_frame = frame[start_y:start_y+360, start_x:start_x+360]
+        start_x = (width - IMAGE_SIZE) // 2
+        start_y = (height - IMAGE_SIZE) // 2
+        cropped = frame[start_y:start_y+IMAGE_SIZE, start_x:start_x+IMAGE_SIZE]
         
         # Save image
-        filename = os.path.join(output, f"{throw}_{i+1:03d}.jpg")
-        cv2.imwrite(filename, cropped_frame)
+        filename = os.path.join(output, f"{throw}_{i+1:04d}.jpg")
+        cv2.imwrite(filename, cropped)
         print(f"Saved {filename}")
         
-        time.sleep(0.25)  # Wait for 250ms
+        time.sleep(SHUTTER_SPEED)
     
     cap.release()
-    print("Photos complete.")
+    print("COMPLETE.")
 
 if __name__ == "__main__":
-    capture_images()
+    throw = input('Throw:')
+    hand = input("Hand: ")
+    amount = int(input("Amount: "))
+    capture_images(throw, hand, amount)
